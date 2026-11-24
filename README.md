@@ -1,31 +1,40 @@
-# Echo Show 5 / 8 維護指南
+# Amazon Device Maintenance
 
-適用於自己的 **Echo Show 5 第 2 代（`cronos`）** 或 **Echo Show 8 第 1 代（`crown`）**。本文的驗證版本為 Fire OS `NS65751/8851N`、Magisk `30.7` 和 Paladin `1.0.2003176674`。
+[English](README.md) · [繁體中文](README.zh-TW.md)
 
-準備 [Android Platform-Tools](https://developer.android.com/tools/releases/platform-tools)、可用且已授權的 USB ADB，以及裝置相符的備份。以下以 `SERIAL` 代表 `adb devices -l` 列出的目標序號，以 `DEVICE_IP` 代表裝置在區域網路上的 IP。只操作已確認的裝置。
+Maintenance guides for Amazon Echo and Fire devices. The five steps below document the verified Echo Show setup.
 
-## 1. 更新韌體
+| Device | Codename | Status |
+|---|---|---|
+| Echo Show 5 (2nd gen) | `cronos` | Verified on Fire OS `NS65751/8851N` |
+| Echo Show 8 (1st gen) | `crown` | Verified on Fire OS `NS65751/8851N` |
+| Echo Dot (2nd gen) | `biscuit` | Pending device testing |
+| Fire HD 8 / Fire HD 10 | Varies by generation | Pending model identification and testing |
 
-- 原廠裝置可以從「設定 → 關於此裝置 → 檢查軟體更新」更新。這會安裝 Amazon 目前提供的版本，版本可能高於本文驗證過的版本。[Amazon 更新說明](https://digprjsurvey.amazon.com/csad/help/node/GYB55PBLWG8A6FJ8)
-- 已解鎖且裝有相容 TWRP 的裝置，若已取得與機型相符的原廠更新檔，可在核對 recovery 相容性並備份後，用 TWRP 的 ADB Sideload 安裝。兩個機型的 `8851N` 不是同一個套件。TWRP 上游不保證廠商 OTA 相容。先確認更新後仍能回到 recovery 或使用 USB ADB，並保留清除資料選項未勾選。[TWRP Sideload 說明](https://twrp.me/faq/ADBSideload.html) · [TWRP 對廠商 OTA 的說明](https://twrp.me/faq/officialota.html)
+The Echo Show steps use Magisk `30.7` and Paladin `1.0.2003176674`. Use your own device, an authorized USB ADB connection, [Android Platform-Tools](https://developer.android.com/tools/releases/platform-tools), and a device-specific backup. Replace `SERIAL` with the target from `adb devices -l` and `DEVICE_IP` with its LAN address.
+
+## 1. Update the firmware
+
+- On a stock device, open **Settings → About This Device → Check for Software Updates**. Amazon may offer a newer build than the one verified here. [Amazon's update instructions](https://digprjsurvey.amazon.com/csad/help/node/GYB55PBLWG8A6FJ8)
+- On an already-unlocked Echo Show with a verified compatible TWRP installation, back up the device and use **ADB Sideload** with the full package for its codename. Confirm you can return to recovery or USB ADB afterward. Leave the wipe options unchecked. TWRP upstream does not support manufacturer OTAs. [TWRP Sideload](https://twrp.me/faq/ADBSideload.html) · [TWRP OTA support](https://twrp.me/faq/officialota.html)
 
 ```sh
 adb -s SERIAL shell getprop ro.product.device
 adb -s SERIAL shell getprop ro.build.fingerprint
-# 已進入並確認為目標裝置的 TWRP Sideload 模式後執行：
+# Run after the target enters TWRP Sideload mode.
 adb -s SERIAL sideload FIRE_OS_UPDATE
 ```
 
-以 recovery 的安裝結果為準。開機後再次查 build fingerprint，確認系統版本。Windows 也可用 `Get-FileHash -Algorithm SHA256` 核對更新包，下列是兩份實測套件的雜湊。
+Verify SHA-256 before installing. On Windows, use `Get-FileHash -Algorithm SHA256`. Check the recovery installation result, then recheck the build fingerprint after boot.
 
-| 套件目標 | SHA-256 |
+| Full firmware package | SHA-256 |
 |---|---|
-| [Cronos 8851N 完整韌體](https://d1s31zyz7dcc2d.cloudfront.net/2026/11/12/c155f085-0ef9-4fc9-b6ec-0776f4cebf9b/update-kindle-cronos-NS65751_user_8851_0013524702084.bin) | `216282efaa846fcfb12baaf3766cc4d090202a7bd35e05bd87e94e7e3e8039f4` |
-| [Crown 8851N 完整韌體](https://d1s31zyz7dcc2d.cloudfront.net/2026/11/12/ca75dc10-f865-46a1-9d66-50295cc560c9/update-kindle-crown-NS65751_user_8851_0013524702084.bin) | `2e6db9835fbb0d89428e396542cf17d348c6a15f915e0fb856d5d0b8e252e90c` |
+| [Cronos 8851N](https://d1s31zyz7dcc2d.cloudfront.net/2026/11/12/c155f085-0ef9-4fc9-b6ec-0776f4cebf9b/update-kindle-cronos-NS65751_user_8851_0013524702084.bin) | `216282efaa846fcfb12baaf3766cc4d090202a7bd35e05bd87e94e7e3e8039f4` |
+| [Crown 8851N](https://d1s31zyz7dcc2d.cloudfront.net/2026/11/12/ca75dc10-f865-46a1-9d66-50295cc560c9/update-kindle-crown-NS65751_user_8851_0013524702084.bin) | `2e6db9835fbb0d89428e396542cf17d348c6a15f915e0fb856d5d0b8e252e90c` |
 
-## 2. 安裝 Magisk 並驗證 root
+## 2. Install Magisk and verify root
 
-用於已解鎖且可寫入 `boot` 的裝置。可從對應的完整韌體用 `tar -xf FIRE_OS_UPDATE boot.img` 取出原廠映像。保存備份後，使用[官方 Magisk 30.7 APK](https://github.com/topjohnwu/Magisk/releases/tag/v30.7)，在同一台 Echo Show 的 Magisk App 選擇 **Select and Patch a File**，修補與目前韌體相符的 `boot.img`。若尚無 App，可在已授權的 USB ADB 上用 `adb -s SERIAL install -r Magisk-v30.7.apk` 安裝。依裝置已驗證的寫入方式刷入修補映像，然後重開機。Cronos 可用已確認的 TWRP **Install Image → Boot**，Crown 可用已解鎖的 fastboot `flash boot`。遇到原廠 boot 無法提供 USB ADB 時，先確認該機型的復原及重新連線方式。[Magisk 30.7 安裝說明](https://github.com/topjohnwu/Magisk/blob/v30.7/docs/install.md#patching-images)
+On an already-unlocked device with a confirmed boot write and recovery path, back up `boot`. Extract the matching stock image with `tar -xf FIRE_OS_UPDATE boot.img`. Install the [official Magisk 30.7 APK](https://github.com/topjohnwu/Magisk/releases/tag/v30.7) using `adb -s SERIAL install -r Magisk-v30.7.apk` if needed. In Magisk on that same Echo Show, use **Select and Patch a File** with the boot image for its current build. Flash only the patched `boot` using the verified write path for that device, then reboot. Cronos can use TWRP **Install Image → Boot** when available. Crown uses unlocked fastboot `flash boot`. The stock boot may leave USB ADB unavailable, so verify recovery access before flashing. [Magisk 30.7 installation guide](https://github.com/topjohnwu/Magisk/blob/v30.7/docs/install.md#patching-images)
 
 ```sh
 adb -s SERIAL shell getprop sys.boot_completed
@@ -33,11 +42,11 @@ adb -s SERIAL shell "su -c 'magisk -V'"
 adb -s SERIAL shell su -c id
 ```
 
-預期依序為 `1`、`30700`、`uid=0`。原本 ADB shell 若已是 root，另核對 `su` 回傳的 Magisk context `u:r:magisk:s0`。
+Expect `1`, `30700`, and `uid=0`, respectively. If ADB already runs as root, also look for the Magisk context `u:r:magisk:s0` in the `su` output.
 
-## 3. 開啟網路 ADB（Ethernet 或 Wi-Fi）
+## 3. Enable ADB over Ethernet or Wi-Fi
 
-保留 USB，先確認 `adb -s SERIAL shell getprop ro.adb.secure` 回傳 `1`，再用已授權的 USB 偵錯開啟 TCP ADB。若目前的 boot 未啟用 ADB 驗證，使用 USB 完成後續步驟。接上有線轉接器時，用裝置的網路設定或 `adb -s SERIAL shell ip addr show` 找到**有線介面**的位址。有線網路尚未在本專案實測，已確認的 LAN 連線是 Wi-Fi。[Android ADB 說明](https://developer.android.com/tools/adb#connect-to-a-device-over-wi-fi)
+Keep USB connected and check that `adb -s SERIAL shell getprop ro.adb.secure` returns `1`. Use USB for the remaining steps if the boot image lacks ADB authentication. For Ethernet, use the wired interface's address from the device's network settings or `adb -s SERIAL shell ip addr show`. Wi-Fi ADB was verified on this project. Wired Ethernet is untested. [Android ADB documentation](https://developer.android.com/tools/adb#connect-to-a-device-over-wi-fi)
 
 ```sh
 adb -s SERIAL tcpip 5555
@@ -45,20 +54,20 @@ adb connect DEVICE_IP:5555
 adb -s DEVICE_IP:5555 shell getprop ro.serialno
 ```
 
-確認回傳原裝置序號。若重開機後需要自動啟用，而且該 build 的 adbd 支援持久屬性，可用 `adb -s SERIAL shell "su -c 'setprop persist.adb.tcp.port 5555'"`，重開後重新連線實測。只在可信任的區域網路使用 TCP ADB。[Android 7.1.2 adbd 實作](https://raw.githubusercontent.com/aosp-mirror/platform_system_core/android-7.1.2_r39/adb/daemon/main.cpp)
+Verify the returned device serial. For builds that honor the persistent property, run `adb -s SERIAL shell "su -c 'setprop persist.adb.tcp.port 5555'"` and test again after a reboot. Use TCP ADB on a trusted LAN. [Android 7.1.2 adbd source](https://raw.githubusercontent.com/aosp-mirror/platform_system_core/android-7.1.2_r39/adb/daemon/main.cpp)
 
-## 4. 過濾首頁 Sponsored 卡片
+## 4. Filter sponsored home cards
 
-這兩支腳本只過濾 Paladin 的 `JunoAd` 卡片。從 [Frida 16.5.9](https://github.com/frida/frida/releases/tag/16.5.9) 下載並解壓 `frida-inject-16.5.9-android-arm.xz`，將執行檔命名為 `frida-inject`。從本目錄執行以下指令。Cronos 使用 [cronos.js](nojunoad/cronos.js)，Crown 使用 [crown.js](nojunoad/crown.js)。一個 Paladin 程序只啟動一個 injector。
+Download `frida-inject-16.5.9-android-arm.xz` from [Frida 16.5.9](https://github.com/frida/frida/releases/tag/16.5.9), extract it, and name the executable `frida-inject`. Use [cronos.js](nojunoad/cronos.js) for Cronos or [crown.js](nojunoad/crown.js) for Crown. These scripts filter Paladin's `JunoAd` cards. Use one injector per Paladin process.
 
 ```sh
 adb -s SERIAL push frida-inject /data/local/tmp/frida-inject
 adb -s SERIAL push nojunoad/cronos.js /data/local/tmp/echo-nojunoad.js
-# Crown 請改用上一行的 nojunoad/crown.js。
+# For Crown, use nojunoad/crown.js in the preceding command.
 adb -s SERIAL shell
 ```
 
-在裝置 shell 內，若 `id -u` 不是 `0`，先執行 `su`。查出 Paladin PID 後，執行最後一行，把 `PALADIN_PID` 換成剛查到的唯一數字。
+In the device shell, run `su` if `id -u` returns a value other than `0`. Replace `PALADIN_PID` with the single PID reported by `pidof`.
 
 ```sh
 chmod 700 /data/local/tmp/frida-inject
@@ -66,11 +75,11 @@ pidof com.amazon.paladin
 /data/local/tmp/frida-inject -p PALADIN_PID -s /data/local/tmp/echo-nojunoad.js
 ```
 
-另一個終端可用 `adb -s SERIAL logcat -s NOJUNOAD:I` 觀察。`HOOKED` 表示掛鉤成功，`DROP JunoAd` 表示確實攔截。這是手動執行方式。Launcher 或裝置重啟後，用新的 PID 重新執行。
+From another terminal, run `adb -s SERIAL logcat -s NOJUNOAD:I`. `HOOKED` confirms that the filter is active. `DROP JunoAd` confirms a blocked card. Restart the injector with the new PID after Paladin or the device restarts.
 
-## 5. 停用系統 OTA
+## 5. Disable system OTA
 
-在裝置的 root shell 執行下面指令。停用後需自行安排系統更新。
+Run these commands in the device's root shell. After disabling OTA, plan future system updates manually.
 
 ```sh
 pm disable-user --user 0 com.amazon.device.software.ota
@@ -78,4 +87,4 @@ pm disable-user --user 0 com.amazon.device.software.ota.override
 pm list packages -d --user 0 com.amazon.device.software.ota
 ```
 
-兩條停用指令都應回報 `disabled-user`，最後的清單應包含兩個套件。各套件的 `dumpsys package 套件名稱` 也可用來確認 `User 0` 的 `enabled=3`。
+Both disable commands should report `disabled-user`, and the final list should contain both packages. To verify separately, run `dumpsys package PACKAGE` for each and check for `enabled=3` under `User 0`.
