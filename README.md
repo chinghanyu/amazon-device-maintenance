@@ -32,9 +32,20 @@ Verify SHA-256 before installing. On Windows, use `Get-FileHash -Algorithm SHA25
 | [Cronos 8851N](https://d1s31zyz7dcc2d.cloudfront.net/2026/11/12/c155f085-0ef9-4fc9-b6ec-0776f4cebf9b/update-kindle-cronos-NS65751_user_8851_0013524702084.bin) | `216282efaa846fcfb12baaf3766cc4d090202a7bd35e05bd87e94e7e3e8039f4` |
 | [Crown 8851N](https://d1s31zyz7dcc2d.cloudfront.net/2026/11/12/ca75dc10-f865-46a1-9d66-50295cc560c9/update-kindle-crown-NS65751_user_8851_0013524702084.bin) | `2e6db9835fbb0d89428e396542cf17d348c6a15f915e0fb856d5d0b8e252e90c` |
 
+### Restore USB ADB after the update
+
+The `8851N` OTA writes the stock `boot.img` and replaces any existing Magisk-patched boot. Stock boot may leave USB ADB unavailable. If authorized USB ADB works after the update, proceed to Magisk. Otherwise, use a recovery or bootloader interface you already have and a trusted boot-root image verified for your device and target firmware.
+
+| Model | Boot-root installation |
+|---|---|
+| Cronos | Install the compatible `boot-root.zip` as a ZIP in TWRP. |
+| Crown | Extract `boot-root.img` from the compatible `boot-root.zip`. Confirm the device in unlocked fastboot before flashing only the `boot` partition. |
+
+Verify the device, image and recovery path before writing. Boot into Fire OS, then check `adb devices -l` and `adb -s SERIAL shell id`. A root ADB shell may already report `uid=0`. Verify Magisk `su` separately in step 2. If USB ADB is still unavailable, stop and check recovery access.
+
 ## 2. Install Magisk and verify root
 
-On an already-unlocked device with a confirmed boot write and recovery path, back up `boot`. Extract the matching stock image with `tar -xf FIRE_OS_UPDATE boot.img`. Install the [official Magisk 30.7 APK](https://github.com/topjohnwu/Magisk/releases/tag/v30.7) using `adb -s SERIAL install -r Magisk-v30.7.apk` if needed. In Magisk on that same Echo Show, use **Select and Patch a File** with the boot image for its current build. Flash only the patched `boot` using the verified write path for that device, then reboot. Cronos can use TWRP **Install Image → Boot** when available. Crown uses unlocked fastboot `flash boot`. The stock boot may leave USB ADB unavailable, so verify recovery access before flashing. [Magisk 30.7 installation guide](https://github.com/topjohnwu/Magisk/blob/v30.7/docs/install.md#patching-images)
+On an already-unlocked device with a confirmed boot write and recovery path, back up `boot`. Extract the matching stock image with `tar -xf FIRE_OS_UPDATE boot.img`. Install the [official Magisk 30.7 APK](https://github.com/topjohnwu/Magisk/releases/tag/v30.7) using `adb -s SERIAL install -r Magisk-v30.7.apk` if needed. In Magisk on that same Echo Show, use **Select and Patch a File** with a device-appropriate boot image. If you needed boot-root to restore USB ADB, back up that known-working boot and use it as the patch input. Flash only the patched `boot` using the verified write path for that device, then reboot. Cronos can use TWRP **Install Image → Boot** when available. Crown uses unlocked fastboot `flash boot`. The stock boot may leave USB ADB unavailable, so verify recovery access before flashing. [Magisk 30.7 installation guide](https://github.com/topjohnwu/Magisk/blob/v30.7/docs/install.md#patching-images)
 
 ```sh
 adb -s SERIAL shell getprop sys.boot_completed

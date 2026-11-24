@@ -34,9 +34,20 @@ adb -s SERIAL sideload FIRE_OS_UPDATE
 | [Cronos 8851N 完整韌體](https://d1s31zyz7dcc2d.cloudfront.net/2026/11/12/c155f085-0ef9-4fc9-b6ec-0776f4cebf9b/update-kindle-cronos-NS65751_user_8851_0013524702084.bin) | `216282efaa846fcfb12baaf3766cc4d090202a7bd35e05bd87e94e7e3e8039f4` |
 | [Crown 8851N 完整韌體](https://d1s31zyz7dcc2d.cloudfront.net/2026/11/12/ca75dc10-f865-46a1-9d66-50295cc560c9/update-kindle-crown-NS65751_user_8851_0013524702084.bin) | `2e6db9835fbb0d89428e396542cf17d348c6a15f915e0fb856d5d0b8e252e90c` |
 
+### 更新後恢復 USB ADB
+
+`8851N` OTA 會寫入原廠 `boot.img`，覆蓋原有的 Magisk 修補映像。原廠 boot 開機後可能沒有 USB ADB。若更新後已可使用授權的 USB ADB，直接進入 Magisk 步驟。若 ADB 無法使用，請透過裝置既有的 recovery 或 bootloader，使用來源可信、已驗證適用於該機型和目標韌體的 boot-root 映像。
+
+| 機型 | boot-root 安裝方式 |
+|---|---|
+| Cronos | 在 TWRP 以 ZIP 套件方式安裝相容的 `boot-root.zip`。 |
+| Crown | 從相容的 `boot-root.zip` 取出 `boot-root.img`。在已解鎖的 fastboot 核對裝置後，只刷入 `boot` 分割區。 |
+
+寫入前核對裝置、映像和復原方式。進入 Fire OS 後，以 `adb devices -l` 和 `adb -s SERIAL shell id` 驗證。Root ADB shell 可能已顯示 `uid=0`，Magisk 的 `su` 仍要在第 2 步另行確認。若 USB ADB 仍不可用，先停下確認 recovery 能否進入。
+
 ## 2. 安裝 Magisk 並驗證 root
 
-用於已解鎖且可寫入 `boot` 的裝置。可從對應的完整韌體用 `tar -xf FIRE_OS_UPDATE boot.img` 取出原廠映像。保存備份後，使用[官方 Magisk 30.7 APK](https://github.com/topjohnwu/Magisk/releases/tag/v30.7)，在同一台 Echo Show 的 Magisk App 選擇 **Select and Patch a File**，修補與目前韌體相符的 `boot.img`。若尚無 App，可在已授權的 USB ADB 上用 `adb -s SERIAL install -r Magisk-v30.7.apk` 安裝。依裝置已驗證的寫入方式刷入修補映像，然後重開機。Cronos 可用已確認的 TWRP **Install Image → Boot**，Crown 可用已解鎖的 fastboot `flash boot`。遇到原廠 boot 無法提供 USB ADB 時，先確認該機型的復原及重新連線方式。[Magisk 30.7 安裝說明](https://github.com/topjohnwu/Magisk/blob/v30.7/docs/install.md#patching-images)
+用於已解鎖且可寫入 `boot` 的裝置。可從對應的完整韌體用 `tar -xf FIRE_OS_UPDATE boot.img` 取出原廠映像。保存備份後，使用[官方 Magisk 30.7 APK](https://github.com/topjohnwu/Magisk/releases/tag/v30.7)，在同一台 Echo Show 的 Magisk App 選擇 **Select and Patch a File**，修補適用於該台裝置的 boot。若前一步靠 boot-root 恢復 USB ADB，請先備份這份已驗證可開機的 boot，再用它作為修補來源。若尚無 App，可在已授權的 USB ADB 上用 `adb -s SERIAL install -r Magisk-v30.7.apk` 安裝。依裝置已驗證的寫入方式刷入修補映像，然後重開機。Cronos 可用已確認的 TWRP **Install Image → Boot**，Crown 可用已解鎖的 fastboot `flash boot`。遇到原廠 boot 無法提供 USB ADB 時，先確認該機型的復原及重新連線方式。[Magisk 30.7 安裝說明](https://github.com/topjohnwu/Magisk/blob/v30.7/docs/install.md#patching-images)
 
 ```sh
 adb -s SERIAL shell getprop sys.boot_completed
