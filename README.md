@@ -76,12 +76,11 @@ Verify the returned device serial. For builds that honor the persistent property
 
 ## 4. Filter sponsored home cards
 
-Download `frida-inject-16.5.9-android-arm.xz` from [Frida 16.5.9](https://github.com/frida/frida/releases/tag/16.5.9), extract it, and name the executable `frida-inject`. Use [cronos.js](nojunoad/cronos.js) for Cronos or [crown.js](nojunoad/crown.js) for Crown. These scripts filter Paladin's `JunoAd` cards. Use one injector per Paladin process.
+Download `frida-inject-16.5.9-android-arm.xz` from [Frida 16.5.9](https://github.com/frida/frida/releases/tag/16.5.9), extract it, and name the executable `frida-inject`. Cronos and Crown use the same [v3 filter](nojunoad/filter.js) for Paladin's `JunoAd` cards. Use one injector per Paladin process.
 
 ```sh
 adb -s SERIAL push frida-inject /data/local/tmp/frida-inject
-adb -s SERIAL push nojunoad/cronos.js /data/local/tmp/echo-nojunoad.js
-# For Crown, use nojunoad/crown.js in the preceding command.
+adb -s SERIAL push nojunoad/filter.js /data/local/tmp/echo-nojunoad.js
 adb -s SERIAL shell
 ```
 

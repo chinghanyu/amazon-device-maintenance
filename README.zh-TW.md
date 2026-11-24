@@ -78,12 +78,11 @@ adb -s DEVICE_IP:5555 shell getprop ro.serialno
 
 ## 4. 過濾首頁 Sponsored 卡片
 
-這兩支腳本只過濾 Paladin 的 `JunoAd` 卡片。從 [Frida 16.5.9](https://github.com/frida/frida/releases/tag/16.5.9) 下載並解壓 `frida-inject-16.5.9-android-arm.xz`，將執行檔命名為 `frida-inject`。從本目錄執行以下指令。Cronos 使用 [cronos.js](nojunoad/cronos.js)，Crown 使用 [crown.js](nojunoad/crown.js)。一個 Paladin 程序只啟動一個 injector。
+Cronos 和 Crown 共用同一支 [v3 腳本](nojunoad/filter.js)，過濾 Paladin 的 `JunoAd` 卡片。從 [Frida 16.5.9](https://github.com/frida/frida/releases/tag/16.5.9) 下載並解壓 `frida-inject-16.5.9-android-arm.xz`，將執行檔命名為 `frida-inject`。一個 Paladin 程序只啟動一個 injector。
 
 ```sh
 adb -s SERIAL push frida-inject /data/local/tmp/frida-inject
-adb -s SERIAL push nojunoad/cronos.js /data/local/tmp/echo-nojunoad.js
-# Crown 請改用上一行的 nojunoad/crown.js。
+adb -s SERIAL push nojunoad/filter.js /data/local/tmp/echo-nojunoad.js
 adb -s SERIAL shell
 ```
 
