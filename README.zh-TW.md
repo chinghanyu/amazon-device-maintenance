@@ -40,8 +40,15 @@ adb -s SERIAL sideload FIRE_OS_UPDATE
 
 | 機型 | boot-root 安裝方式 |
 |---|---|
-| Cronos | 在 TWRP 以 ZIP 套件方式安裝相容的 `boot-root.zip`。 |
-| Crown | 從相容的 `boot-root.zip` 取出 `boot-root.img`。在已解鎖的 fastboot 核對裝置後，只刷入 `boot` 分割區。 |
+| Cronos | 在 TWRP 選擇 **Install**，直接刷入相容的 `boot-root.zip`。 |
+| Crown | `boot-root.zip` 沒有 TWRP 安裝腳本。取出 `boot-root.img`，手動將 Crown 開機進入 fastboot 模式，再從電腦刷入映像。 |
+
+Crown 手動進入 fastboot 後，在電腦執行下列指令。刷入前先核對序號並確認 bootloader 已解鎖。
+
+```sh
+fastboot devices
+fastboot -s SERIAL flash boot boot-root.img
+```
 
 寫入前核對裝置、映像和復原方式。進入 Fire OS 後，以 `adb devices -l` 和 `adb -s SERIAL shell id` 驗證。Root ADB shell 可能已顯示 `uid=0`，Magisk 的 `su` 仍要在第 2 步另行確認。若 USB ADB 仍不可用，先停下確認 recovery 能否進入。
 

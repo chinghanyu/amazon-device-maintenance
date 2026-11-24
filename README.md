@@ -38,8 +38,15 @@ The `8851N` OTA writes the stock `boot.img` and replaces any existing Magisk-pat
 
 | Model | Boot-root installation |
 |---|---|
-| Cronos | Install the compatible `boot-root.zip` as a ZIP in TWRP. |
-| Crown | Extract `boot-root.img` from the compatible `boot-root.zip`. Confirm the device in unlocked fastboot before flashing only the `boot` partition. |
+| Cronos | In TWRP, use **Install** to flash the compatible `boot-root.zip` directly. |
+| Crown | The `boot-root.zip` has no TWRP installer script. Extract `boot-root.img`, manually boot Crown into fastboot mode, then flash the image from the host. |
+
+For Crown, run these commands after manually entering fastboot. Confirm the serial number and that the bootloader is already unlocked before flashing.
+
+```sh
+fastboot devices
+fastboot -s SERIAL flash boot boot-root.img
+```
 
 Verify the device, image and recovery path before writing. Boot into Fire OS, then check `adb devices -l` and `adb -s SERIAL shell id`. A root ADB shell may already report `uid=0`. Verify Magisk `su` separately in step 2. If USB ADB is still unavailable, stop and check recovery access.
 
